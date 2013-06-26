@@ -4,10 +4,10 @@ class SimpleNoticeMigration < ActiveRecord::Migration
       t.string  :what
       t.string  :scene
       t.integer :user_id
-      t.text    :moel_id
+      t.text    :model_id
       t.string  :model_type
       t.text    :data
-      t.boolean :is_read
+      t.boolean :is_read, :default => false
       t.timestamps
     end
   end
