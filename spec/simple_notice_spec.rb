@@ -11,12 +11,15 @@ class Question < ActiveRecord::Base
                 :set_notice_data => lambda {|question, callback_type|
                   return 'change_1_data'
                 },
-                :before_record_notice => lambda {|question, allback_type|
+                :before_record_notice => lambda {|question, callback_type|
                   if question.name == 'name_1'
                     return true
                   else
                     return false
                   end
+                },
+                :after_record_notice => lambda {|question, callback_type, notice|
+                  User.create!(:name => "after_record_notice_#{notice.data}")
                 }
 
   record_notice :scene => 'change_2',
@@ -74,6 +77,10 @@ describe 'xx' do
       notice.user.should == @user
       notice.model.should == @question
       notice.is_read.should == false
+    }
+
+    it{
+      User.last.name.should == "after_record_notice_change_1_data"
     }
   end
 

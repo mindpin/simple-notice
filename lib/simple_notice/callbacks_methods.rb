@@ -38,13 +38,19 @@ module SimpleNotice
       end
 
       users.each do |user|
-        SimpleNotice::Notice.create({
+        notice = SimpleNotice::Notice.create({
           :user => user,
           :model => self,
           :scene => options[:scene],
           :data => data,
           :what => "#{callback_name}_#{self.class.to_s.underscore}"
         })
+
+        proc = options[:after_record_notice]
+        if proc.is_a?(Proc)
+          proc.call(self, callback_name.to_sym, notice)
+        end
+        
       end
 
     rescue Exception => ex

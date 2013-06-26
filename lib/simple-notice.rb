@@ -17,7 +17,8 @@ module SimpleNotice
           :callbacks             => callbacks,
           :users                 => options[:users],
           :set_notice_data       => options[:set_notice_data],
-          :before_record_notice  => options[:before_record_notice]
+          :before_record_notice  => options[:before_record_notice],
+          :after_record_notice   => options[:after_record_notice]
         })
 
         self.send(:include, CallbacksMethods)
