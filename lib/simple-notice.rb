@@ -1,0 +1,2 @@
+module SimpleNotice
+end
