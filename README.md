@@ -48,6 +48,9 @@ class Question < ActiveRecord::Base
                   else
                     return false
                   end
+                },
+                :after_record_notice => lambda {|question, callback_type, notice|
+                  # notice 创建后的钩子
                 }
 end
 ```
