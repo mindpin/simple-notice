@@ -51,7 +51,8 @@ class Question < ActiveRecord::Base
                 },
                 :after_record_notice => lambda {|question, callback_type, notice|
                   # notice 创建后的钩子
-                }
+                },
+                :async => true
 end
 ```
 
