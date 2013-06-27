@@ -9,57 +9,28 @@ module SimpleNotice
     end
 
     def __set_notice_on_commit(callback_name)
-      self.class.record_notice_options.each do |options|
+      self.class.record_notice_options.each_with_index do |options,index|
         if options[:callbacks].include?(callback_name)
-          __set_notice_on_commit_by_options(callback_name, options)
+          proc = options[:before_record_notice]
+          if proc.is_a?(Proc)
+            bool = proc.call(self, callback_name)
+            if bool
+              __set_notice_on_commit_by_options(callback_name, index, options[:async])
+            end
+          end
         end
       end
     end
 
-    def __set_notice_on_commit_by_options(callback_name, options)
-      proc = options[:before_record_notice]
-      if proc.is_a?(Proc)
-        bool = proc.call(self, callback_name.to_sym)
-        return true if !bool
-      end
-
-      proc = options[:set_notice_data]
-      if proc.is_a?(Proc)
-        data = proc.call(self, callback_name.to_sym)
+    def __set_notice_on_commit_by_options(callback_name, options_index, async)
+      model_name = self.class.to_s
+      model_id   = self.id
+      if async
+        SidekiqWorker.perform_async(model_name, model_id, callback_name, options_index)
       else
-        data = nil
+        SidekiqWorker.new.perform(model_name, model_id, callback_name, options_index)
       end
-
-      proc = options[:users]
-      if proc.is_a?(Proc)
-        users = proc.call(self, callback_name.to_sym)
-      else
-        users = []
-      end
-
-      users.each do |user|
-        notice = SimpleNotice::Notice.create({
-          :user => user,
-          :model => self,
-          :scene => options[:scene],
-          :data => data,
-          :what => "#{callback_name}_#{self.class.to_s.underscore}"
-        })
-
-        proc = options[:after_record_notice]
-        if proc.is_a?(Proc)
-          proc.call(self, callback_name.to_sym, notice)
-        end
-        
-      end
-
-    rescue Exception => ex
-      p "警告: #{self.class} notice 创建失败"
-      puts ex.message
-      puts ex.backtrace*"\n"
     end
-
-
 
   end
 end

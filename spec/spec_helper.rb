@@ -13,6 +13,8 @@ require 'generators/templates/migration'
 require 'migrations'
 require 'models'
 
+require 'sidekiq/testing'
+
 require 'database_cleaner'
 RSpec.configure do |config|
   config.order = "random"

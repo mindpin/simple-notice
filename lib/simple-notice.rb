@@ -1,5 +1,8 @@
+require 'sidekiq'
+require 'sidekiq/limit_fetch'
 require 'simple_notice/notice'
 require 'simple_notice/callbacks_methods'
+require 'simple_notice/sidekiq_worker'
 
 module SimpleNotice
   module Base
@@ -11,14 +14,15 @@ module SimpleNotice
       def record_notice(options)
         scene     = options[:scene]     || self.name.downcase.pluralize
         callbacks = options[:callbacks] || [ :create, :update ]
-
+        
         _add_record_notice_options({
           :scene                 => scene,
           :callbacks             => callbacks,
           :users                 => options[:users],
           :set_notice_data       => options[:set_notice_data],
           :before_record_notice  => options[:before_record_notice],
-          :after_record_notice   => options[:after_record_notice]
+          :after_record_notice   => options[:after_record_notice],
+          :async                 => !!options[:async]
         })
 
         self.send(:include, CallbacksMethods)

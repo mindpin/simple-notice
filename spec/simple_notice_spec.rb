@@ -37,6 +37,22 @@ class Question < ActiveRecord::Base
                     return false
                   end
                 }
+  record_notice :scene => 'change_3',
+                :callbacks => [ :create, :update ],
+                :users => lambda { |question, callback_type|
+                  return [question.creator]
+                },
+                :set_notice_data => lambda {|question, callback_type|
+                  return 'change_3_data'
+                },
+                :before_record_notice => lambda {|question, allback_type|
+                  if question.name == 'name_3'
+                    return true
+                  else
+                    return false
+                  end
+                },
+                :async => true
 end
 
 describe 'xx' do
@@ -82,6 +98,34 @@ describe 'xx' do
     it{
       User.last.name.should == "after_record_notice_change_1_data"
     }
+
+    describe 'change_3' do
+      it{
+        @question.name = 'name_3'
+        @question.save!
+        SimpleNotice::Notice.count.should == 2
+        notice = SimpleNotice::Notice.first
+        notice.data.should == 'change_2_data'
+        SimpleNotice::SidekiqWorker.jobs.clear
+      }
+
+      it{
+        @question.name = 'name_3'
+        @question.save!
+        SimpleNotice::SidekiqWorker.drain
+        SimpleNotice::Notice.count.should == 3
+        notice = SimpleNotice::Notice.first
+        notice.data.should == 'change_3_data'
+      }
+
+      it{
+        Question.create!(:name => 'name_3', :creator => @user)
+        SimpleNotice::SidekiqWorker.drain
+        SimpleNotice::Notice.count.should == 3
+        notice = SimpleNotice::Notice.first
+        notice.data.should == 'change_3_data'
+      }
+    end
   end
 
   describe 'no notices' do

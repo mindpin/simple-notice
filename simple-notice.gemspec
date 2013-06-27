@@ -12,4 +12,7 @@ Gem::Specification.new do |s|
   s.licenses = 'MIT'
   s.files = Dir.glob("lib/**/*") + %w(README.md)
   s.require_paths = ['lib']
+
+  s.add_dependency('sidekiq', '2.8.0')
+  s.add_dependency('sidekiq-limit_fetch', '1.4')
 end
