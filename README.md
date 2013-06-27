@@ -10,7 +10,7 @@ simple-notice
 ```
 gem 'simple-notice',
     :git => 'git://github.com/mindpin/simple-notice',
-    :tag => '0.0.1'
+    :tag => '0.0.2'
 ```
 
 
